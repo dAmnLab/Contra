@@ -136,21 +136,20 @@ class dAmnPHP {
 	function Warning($str = '', $ts = false) { $this->Message('>> '.$str,$ts); }
 	// oAuth function, mode sets silent, 0 = silent, 1 = echo
 	public function oauth($mode, $refresh = false) {
-		$this->os = PHP_OS; // The System OS
 		$this->client_id = '24'; // OAuth 2.0 client_id
 		$this->client_secret = 'b6c81c08563888f0da7ea3f7f763c426'; // OAuth 2.0 client_secret
 
 		if(is_readable("./storage/oauth.json")){ // Checking if the file_exists
 			if($mode == 0) echo "Grabbing existing oAuth tokens..." . LBR; // Turn off if silent
 
-			// Reading config file
-			$config_file = "./storage/oauth.json";
-			if(filesize($config_file) != 0) {
-				$fh = fopen($config_file, 'r') or die("can't open file");
+			// Reading oauth file
+			$oauth_file = "./storage/oauth.json";
+			if(filesize($oauth_file) != 0) {
+				$fh = fopen($oauth_file, 'r') or die("can't open file");
 
 				if($mode == 0) echo "Tokens grabbed from file..." . LBR . LBR;
 			// Setting to the oauth_tokens variable
-				$this->oauth_tokens = json_decode(fread($fh, filesize($config_file)));
+				$this->oauth_tokens = json_decode(fread($fh, filesize($oauth_file)));
 
 					if($refresh) {
 						// Getting the access token.
@@ -160,11 +159,12 @@ class dAmnPHP {
 						$this->oauth_tokens = json_decode($tokens);
 						if($this->oauth_tokens->status != "success") {
 							if($mode == 0) echo $this->error("For some reason, your refresh tokens failed") . LBR;
+							unlink($oauth_file);
 						} else {
 							// Writing to oauth.json
-							$config_file = "./storage/oauth.json";
+							$oauth_file = "./storage/oauth.json";
 
-							$fh = fopen($config_file, 'w') or die("can't open file");
+							$fh = fopen($oauth_file, 'w') or die("can't open file");
 							fwrite($fh, $tokens);
 							fclose($fh);
 							if($mode == 0) echo "Tokens grabbed with refreshtoken!" . LBR;
@@ -182,13 +182,13 @@ class dAmnPHP {
 					}
 				} else {
 					if($mode == 0) echo $this->error("Your token file is empty, grabbing new ones...") . LBR;
-					unlink($config_file);
+					unlink($oauth_file);
 					$this->oauth(0);
 				}
 			} else {
 				if($mode == 0) echo "Grabbing the oAuth Tokens from deviantART..." . LBR; // Turn off if silent
 
-				echo "Open your browser to the required URL. Please load the link below! (Make sure to login the accoun you're using for bot first.)" . LBR;
+				echo "Open your browser to the required URL. Please load the link below! (Make sure to login the account you're using for bot first.)" . LBR;
 		 		echo 'https://www.deviantart.com/oauth2/draft15/authorize?client_id='.$this->client_id.'&redirect_uri=http://damn.shadowkitsune.net/apicode/&response_type=code' . LBR;
 
 				// Retreiving the code
@@ -204,9 +204,9 @@ class dAmnPHP {
 					if($mode == 0) echo $this->error("For some reason, your tokens failed") . LBR;
 				} else {
 					// Writing to oauth.json
-					$config_file = "./storage/oauth.json";
+					$oauth_file = "./storage/oauth.json";
 
-					$fh = fopen($config_file, 'w') or die("can't open file");
+					$fh = fopen($oauth_file, 'w') or die("can't open file");
 					fwrite($fh, $tokens);
 					fclose($fh);
 					if($mode == 0) echo "Tokens grabbed!" . LBR;
@@ -247,27 +247,29 @@ class dAmnPHP {
 		echo " \033[1;33m" . $text . "\033[0m";
 	}
 
-	function send_headers($socket, $host, $url, $referer, $post=null)
+	function send_headers($socket, $host, $url, $referer, $post=null, $cookies=array())
 	{
 	    try
 	    {
 		$headers = '';
-		if (isset($post))
+		if(isset($post))
 			$headers .= "POST $url HTTP/1.1\r\n";
 		else $headers .= "GET $url HTTP/1.1\r\n";
 		$headers .= "Host: $host\r\n";
 		$headers .= 'User-Agent: '.$this->Agent."\r\n";
 		$headers .= "Referer: $referer\r\n";
+		if($cookies != array())
+			$headers .= 'Cookie: '.implode("; ", $cookies)."\r\n";
 		$headers .= "Connection: close\r\n";
 		$headers .= "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*\/*;q=0.8\r\n";
 		$headers .= "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n";
 		$headers .= "Content-Type: application/x-www-form-urlencoded\r\n";
-		if (isset($post))
+		if(isset($post))
 			$headers .= 'Content-Length: '.strlen($post)."\r\n\r\n$post";
 		else $headers .= "\r\n";
 		$response = '';
 		fputs($socket, $headers);
-		while (!@feof ($socket)) $response .= @fgets ($socket, 8192);
+		while(!@feof ($socket)) $response .= @fgets($socket, 8192);
 		return $response;
 	    }
 	    catch (Exception $e)
@@ -320,7 +322,7 @@ class dAmnPHP {
 			if(strtolower($chat1)==strtolower($discard)) return '@'.$chat1;
 			else return '@'.$chat2;
 		}
-		return (substr($chat,0,1)=='#') ? $chat : (substr($chat, 0, 1)=='@' ? $chat : '#$chat');
+		return (substr($chat,0,1)=='#') ? $chat : (substr($chat, 0, 1)=='@' ? $chat : "#$chat");
 	}
 
 	function format_chat($chat, $chat2=false) {
