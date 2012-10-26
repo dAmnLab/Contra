@@ -41,9 +41,9 @@ class System_commands extends extension {
 		$this->addCmd('uptime', 'c_about');
 		$this->addCmd($cmds, 'c_commands');
 		$this->addCmd($cmd, 'c_command', 99);
-		$this->addCmd($mods, 'c_modules');
+		$this->addCmd($mods, 'c_modules', 50);
 		$this->addCmd($mod, 'c_module', 99);
-		$this->addCmd('users', 'c_users');
+		$this->addCmd('users', 'c_users', 50);
 		$this->addCmd('user', 'c_user', 100);
 		$this->addCmd($aj, 'c_autojoin', 99);
 		$this->addCmd('ctrig', 'c_trigger', 100);
@@ -540,11 +540,13 @@ class System_commands extends extension {
 	}
 
 	function e_botcheck($parts, $from, $message) {
-		if($parts[2] === 'DIRECT')
-			if(!strstr(strtolower($parts[3]), strtolower($this->Bot->username))) return;
-		if($parts[2] === 'ALL')
+		if(!isset($parts[3])) return;
+		if(isset($parts[0]) && $parts[0] !== 'BDS' && $parts[0] !== 'CODS') return;
+		if($parts[1] == "BOTCHECK" && $parts[2] === 'DIRECT')
+			if(strtolower($parts[3]) !== strtolower($this->Bot->username)) return;
+		if($parts[1] == "BOTCHECK" && $parts[2] === 'ALL')
 			if($this->dAmn->chat['chat:DataShare']['member'][$from]['pc'] !== 'PoliceBot') return;
-		if($parts[2] === 'NODATA') {
+		if($parts[1] == "BOTCHECK" && $parts[2] === 'NODATA' && isset($parts[3])) {
 			if($this->dAmn->chat['chat:DataShare']['member'][$from]['pc'] !== 'PoliceBot') return;
 			if(strtolower($parts[3]) !== strtolower($this->Bot->username)) return;
 		}
@@ -702,10 +704,12 @@ class System_commands extends extension {
 
 	function c_update($ns, $requestor, $message) {
 		if(strtolower($requestor) !== strtolower($this->Bot->owner)) return;
-		elseif($this->botversion['latest'] === true)
-			return $this->dAmn->say($ns, "{$requestor}: Your Contra version is already up-to-date.");
-		elseif(strtolower(args($message, 1)) !== 'yes')
+		if($this->botversion['latest'] === true && strtolower(args($message, 1, true)) !== 'reset yes')
+			return $this->dAmn->say($ns, "{$requestor}: Your Contra version is already up-to-date.<br /><sub>You can reset update by using <code>{$this->Bot->trigger}update reset yes</code></sub>");
+		elseif(strtolower(args($message, 1)) !== 'yes' && strtolower(args($message, 1, true)) !== 'reset yes')
 			return $this->dAmn->say($ns, "{$requestor}: <b>Updating Contra</b>:<br /><i>Are you sure?</i> Using {$this->Bot->trigger}update will overwrite your bot's files.<br /><sub>Type <code>{$this->Bot->trigger}update yes</code> to confirm update.</sub>");
+		elseif(strtolower(args($message, 1, true)) === 'reset yes')
+			$this->botversion['reset'] = true;
 
 		// Everything seems to be in order, let's update!~
 		$this->dAmn->say($ns, "{$requestor}: Now updating. Bot will be shutdown after update is complete.");
@@ -724,7 +728,7 @@ class System_commands extends extension {
 
 			if(strtolower($pay[0]) !== strtolower($self->Bot->username)) return;
 			if(empty($version) || empty($downloadlink)) return;
-			if($version <= $self->Bot->info['version']) return;
+			if($self->botversion['reset'] != true && $version <= $self->Bot->info['version']) return;
 			if($from !== 'Botdom') return;
 
 			$download = file_get_contents($downloadlink);
@@ -760,6 +764,8 @@ class System_commands extends extension {
 		if($pay[0] == $this->Bot->username || strstr($pay[0], 'ALL')) {
 			if($this->Bot->info['version'] < $version && $from == 'Botdom') {
 				$this->botversion['latest'] = false;
+				if(strstr($pay[0], 'ALL'))
+					$this->botversion['notify'] = true;
 				if(!isset($this->Bot->updatenotes) || $this->Bot->updatenotes == true)
 					$this->sendnote($this->Bot->owner, 'Update Service', "A new version of Contra is available. (version: http://github.com/dAmnLab/Contra/commits/v{$version} ({$version}); released on {$released}) You can download it from http://botdom.com/wiki/Contra#Latest or type <code>{$this->Bot->trigger}update</code> to update your bot.<br /><br />(<b>NOTE: using <code>{$this->Bot->trigger}update</code> will overwrite all your changes to your bot.</b>)<br /><br /><sub>To disable this update note in the future, set 'updatenotes' in config.cf to false.</sub>");
 				$this->Console->Alert("Contra {$version} has been released on {$released}. Get it at http://botdom.com/wiki/Contra#Latest");
@@ -804,6 +810,10 @@ class System_commands extends extension {
 			$this->notes[$user] = array();
 		if(!isset($this->receivers[$user]))
 			$this->receivers[$user] = 1;
+		elseif(isset($this->receivers[$user]) && $this->botversion['notify'] == true) {
+			$this->receivers[$user]++;
+			unset($this->botversion['notify']);
+		}
 		$this->notewrite('receive', $this->receivers);
 		$this->notes[$user][-1]['content'] = $content;
 		$this->notes[$user][-1]['from'   ] = $from;

@@ -19,7 +19,7 @@ class Bot {
 	public $start;
 	public $info = array(
 		'name' => 'Contra',
-		'version' => '5.5.5',
+		'version' => '5.5.6',
 		'status' => '',
 		'release' => 'public',
 		'author' => 'photofroggy',
@@ -58,7 +58,8 @@ class Bot {
 		// System information string.
 		$this->sysString = php_uname('s').' '.php_uname('r').' '.php_uname('v');
 
-		if(strstr($this->sysString, 'NT 6.1')) $this->sysString = 'Windows 7';
+		if(strstr($this->sysString, 'NT 6.2')) $this->sysString = 'Windows 8';
+		elseif(strstr($this->sysString, 'NT 6.1')) $this->sysString = 'Windows 7';
 		elseif(strstr($this->sysString, 'NT 6.0')) $this->sysString = 'Windows Vista';
 		elseif(strstr($this->sysString, 'NT 5.2')) $this->sysString = 'Windows 2003';
 		elseif(strstr($this->sysString, 'NT 5.1')) $this->sysString = 'Windows XP';
@@ -132,6 +133,7 @@ class Bot {
 			$this->damntoken = unserialize($config['cookie']);
 		else $this->damntoken = empty($config['damntoken']) ? '' : unserialize($config['damntoken']);
 		$this->updatenotes = empty($config['updatenotes']) ? true : $config['updatenotes'];
+		$this->timezone = $config['timezone'];
 	}
 
 	function save_config() {
@@ -145,6 +147,7 @@ class Bot {
 			'autojoin' => $this->autojoin,
 			'damntoken' => empty($this->damntoken) ? '' : serialize($this->damntoken),
 			'updatenotes' => $this->updatenotes,
+			'timezone' => $this->timezone,
 		);
 		save_config('./storage/config.cf', $config);
 	}
@@ -152,6 +155,20 @@ class Bot {
 	function network($sec = false) {
 		if(empty($this->username)) $this->load_config();
 		$this->Console->Notice(($sec === false ? 'Starting' : 'Restarting').' dAmn.');
+		$socket = fsockopen('ssl://www.deviantart.com', 443);
+		$response = $this->dAmn->send_headers(
+			$socket,
+			$this->owner.'.deviantart.com',
+			'/',
+			'http://'.$this->owner.'.deviantart.com'
+		);
+		fclose($socket);
+		if(($pos = strpos($response, 'HTTP/1.1 200 OK')) === false) {
+			$this->Console->Warning('ERROR: Bot Owner does not exist. Check your bot\'s config.cf');
+			$this->dAmn->close=true;
+			$this->dAmn->disconnect();
+			return;
+		}
 		if(!$this->damntoken) {
 			$this->Console->Notice('Retrieving dAmn Token. This may take a while...');
 			$this->dAmn->oauth(1);
