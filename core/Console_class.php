@@ -18,7 +18,14 @@
 class Console {
 	public $format = 'H:i:s';
 
-	function Time($ts=false) { return date($this->format, ($ts==false?time():$ts)); }
+	function Time($ts=false) {
+		if(PHP_OS == 'Darwin') {
+			$config = include './storage/config.cf';
+			ini_set('date.timezone', $config['timezone']);
+			unset($config);
+		}
+		return date($this->format, ($ts==false?time():$ts));
+	}
 	function Clock($ts=false) {	return '['.$this->Time($ts).']'; }
 	function Message($str = '', $ts = false) {
 		if(DEBUG) $this->log($this->Clock($ts).' '.$str.chr(10));

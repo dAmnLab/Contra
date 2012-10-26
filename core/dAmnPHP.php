@@ -49,15 +49,13 @@
 		sleep(1);
 		exit();
 	}
-	// Also make sure date.timezone is set. If not, kill the program.
-	if(!ini_get('date.timezone')) {
+	// Also make sure date.timezone is set. If not, kill the program, unless it's OSX, then skip the check.
+	if(!ini_get('date.timezone') && PHP_OS != 'Darwin') {
 		echo '>> WARNING: You didn\'t setup php properly. (date.timezone is not set)',chr(10);
 		if(PHP_OS == 'WIN32' || PHP_OS == 'WINNT' || PHP_OS == 'Windows')
 			echo '>> Re-read the Install PHP guide @ http://botdom.com/documentation/Install_PHP_on_Windows#Part_2 (Do/redo step 7-9)',chr(10),'>> ';
 		if(PHP_OS == 'Linux')
 			echo '>> Re-read the Install PHP guide @ http://botdom.com/documentation/Install_PHP_on_Linux#PHP_configure_setup (Do/redo step 2-4)',chr(10),'>> ';
-		if(PHP_OS == 'Darwin')
-			echo '>> Re-read the Install PHP guide @ http://botdom.com/documentation/Install_PHP_on_Mac_OS_X#PHP_configure_setup (Do/redo step 2-4)',chr(10),'>> ';
 		for($i = 0;$i < 3; ++$i) {
 			sleep(1);
 			echo '.';
@@ -189,7 +187,7 @@ class dAmnPHP {
 				if($mode == 0) echo "Grabbing the oAuth Tokens from deviantART..." . LBR; // Turn off if silent
 
 				echo "Open your browser to the required URL. Please load the link below! (Make sure to login the account you're using for bot first.)" . LBR;
-		 		echo 'https://www.deviantart.com/oauth2/draft15/authorize?client_id='.$this->client_id.'&redirect_uri=http://damn.shadowkitsune.net/apicode/&response_type=code' . LBR;
+		 		echo 'https://bit.ly/WI6u6y' . LBR;
 
 				// Retreiving the code
 				echo "Enter the code given by above link:" . LBR;
