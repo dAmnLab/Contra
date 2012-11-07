@@ -19,7 +19,7 @@ class Bot {
 	public $start;
 	public $info = array(
 		'name' => 'Contra',
-		'version' => '5.5.6',
+		'version' => '5.5.7',
 		'status' => '',
 		'release' => 'public',
 		'author' => 'photofroggy',
@@ -91,6 +91,17 @@ class Bot {
 		if(DEBUG) $this->Console->Notice('Loading dAmnPHP, client string is "'.$client.'"');
 		// Load our dAmn interface.
 		$this->dAmn = new dAmnPHP;
+
+		// Check against non joinable channels.
+		foreach($this->autojoin as $key => $chan) {
+			$chan = $this->dAmn->deform_chat($chan);
+			if(in_array(strtolower(str_replace('#', 'chat:', $chan)), $this->dAmn->njc)) {
+				$this->Console->Notice('Channel '.$chan.' is not allowed, and has been removed.');
+				unset($this->autojoin[$key]);
+			}
+		}
+		$this->save_config();
+
 		// Give the interface a client string.
 		$this->dAmn->Client = $client;
 		// And an Agent string.
@@ -126,7 +137,14 @@ class Bot {
 		$config = include './storage/config.cf';
 		$this->username = $config['info']['username'];
 		$this->owner = $config['info']['owner'];
-		$this->trigger = $config['info']['trigger'];
+		if (strlen($config['info']['trigger']) > 1) {
+			$this->trigger = $config['info']['trigger'];
+
+		} else {
+			// Fix for issue #14
+			require_once('./core/Extras.php');
+			$this->trigger = hexentity(html_entity_decode($config['info']['trigger']));
+		}
 		$this->aboutStr = $config['about'];
 		$this->autojoin = $config['autojoin'];
 		if(isset($config['cookie']))
