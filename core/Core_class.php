@@ -19,7 +19,7 @@ class Bot {
 	public $start;
 	public $info = array(
 		'name' => 'Contra',
-		'version' => '5.5.7',
+		'version' => '5.5.8',
 		'status' => '',
 		'release' => 'public',
 		'author' => 'photofroggy',
@@ -147,10 +147,11 @@ class Bot {
 		}
 		$this->aboutStr = $config['about'];
 		$this->autojoin = $config['autojoin'];
-		if(isset($config['cookie']))
+		if(isset($config['cookie']) && !empty($config['cookie']))
 			$this->damntoken = unserialize($config['cookie']);
 		else $this->damntoken = empty($config['damntoken']) ? '' : unserialize($config['damntoken']);
 		$this->updatenotes = empty($config['updatenotes']) ? true : $config['updatenotes'];
+		$this->autoupdate = empty($config['autoupdate']) ? false : $config['autoupdate'];
 		$this->timezone = $config['timezone'];
 	}
 
@@ -165,6 +166,7 @@ class Bot {
 			'autojoin' => $this->autojoin,
 			'damntoken' => empty($this->damntoken) ? '' : serialize($this->damntoken),
 			'updatenotes' => $this->updatenotes,
+			'autoupdate' => $this->autoupdate,
 			'timezone' => $this->timezone,
 		);
 		save_config('./storage/config.cf', $config);
