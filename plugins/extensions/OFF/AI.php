@@ -17,7 +17,7 @@ class Brain extends extension {
 	public $author = 'photofroggy';
 
 	function init() {
-		$this->addCmd('ai', 'c_ai', 75);
+		$this->addCmd('ai', 'c_ai', 99);
 		$this->switch_board();
 	}
 
@@ -33,10 +33,7 @@ class Brain extends extension {
 					$dAmn->say($ns, $from.': AI can\'t be turned on in #Botdom.');
 					break;
 				}
-				elseif($user->has($from, 99)) {
-					if($this->$kw('e_msg', 'recv_msg')) $dAmn->say($ns, $from.': AI turned '.$com.'!');
-					else $dAmn->say($ns, $from.': AI could not be turned '.$com.'.');
-				}
+				if($this->$kw('e_msg', 'recv_msg')) $dAmn->say($ns, $from.': AI turned '.$com.'!');
 				$this->switch_board($com);
 				break;
 			default:
