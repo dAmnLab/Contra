@@ -19,7 +19,7 @@ class Bot {
 	public $start;
 	public $info = array(
 		'name' => 'Contra',
-		'version' => '5.5.8',
+		'version' => '5.5.9',
 		'status' => '',
 		'release' => 'public',
 		'author' => 'photofroggy',
@@ -30,7 +30,8 @@ class Bot {
 	public $trigger;
 	public $aboutStr;
 	public $autojoin;
-        public $session;
+	public $session;
+	public $logging = true;
 	public $damntoken;
 	public $usingStored = false;
 	public $Console;
@@ -145,6 +146,9 @@ class Bot {
 			require_once('./core/Extras.php');
 			$this->trigger = hexentity(html_entity_decode($config['info']['trigger']));
 		}
+		if (!array_key_exists('enable_logs', $config))
+			$config['enable_logs'] = true;
+		$this->logging = $config['enable_logs'];
 		$this->aboutStr = $config['about'];
 		$this->autojoin = $config['autojoin'];
 		if(isset($config['cookie']) && !empty($config['cookie']))
@@ -164,6 +168,7 @@ class Bot {
 			),
 			'about' => $this->aboutStr,
 			'autojoin' => $this->autojoin,
+			'enable_logs' => $this->logging,
 			'damntoken' => empty($this->damntoken) ? '' : serialize($this->damntoken),
 			'updatenotes' => $this->updatenotes,
 			'autoupdate' => $this->autoupdate,
@@ -176,6 +181,9 @@ class Bot {
 		if(empty($this->username)) $this->load_config();
 		$this->Console->Notice(($sec === false ? 'Starting' : 'Restarting').' dAmn.');
 		$socket = fsockopen('ssl://www.deviantart.com', 443);
+		if (!$socket) {
+			die(chr(10).chr(10).'Unable to connect to dAmn. Are you sure you\'re connected to the internet?'.chr(10));
+		}
 		$response = $this->dAmn->send_headers(
 			$socket,
 			$this->owner.'.deviantart.com',

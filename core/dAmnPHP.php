@@ -139,6 +139,7 @@ class dAmnPHP {
 		'chat:daunderworldrpg',
 		'chat:seniors',
 		'chat:odysseyproject',
+		'chat:communityrelations',
 	);
 
 	function Time($ts=false) { return date('H:i:s', ($ts===false?time():$ts)); }
@@ -335,6 +336,7 @@ class dAmnPHP {
 			$headers .= 'Content-Length: '.strlen($post)."\r\n\r\n$post";
 		else $headers .= "\r\n";
 		$response = '';
+		if (!$socket) return '';
 		fputs($socket, $headers);
 		while(!@feof ($socket)) $response .= @fgets($socket, 8192);
 		return $response;
