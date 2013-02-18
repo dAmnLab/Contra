@@ -19,7 +19,7 @@ class Bot {
 	public $start;
 	public $info = array(
 		'name' => 'Contra',
-		'version' => '5.5.9',
+		'version' => '5.6.0',
 		'status' => '',
 		'release' => 'public',
 		'author' => 'photofroggy',
@@ -46,6 +46,19 @@ class Bot {
 		'Bot has quit.',
 		'Bye bye!'
 	);
+	public $propchans = array(
+		'get'     => array(),
+		'set'     => array(),
+		'join'    => array(),
+		'part'    => array(),
+		'promote' => array(),
+		'demote'  => array(),
+		'kick'    => array(),
+		'action'  => array(),
+		'msg'     => array(),
+		'admin'   => array()
+	);
+
 
 	function __construct() {
 
