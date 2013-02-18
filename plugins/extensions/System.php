@@ -542,8 +542,13 @@ class System_commands extends extension {
 	function e_botcheck($parts, $from, $message) {
 		if(!isset($parts[3])) return;
 		if(isset($parts[0]) && $parts[0] !== 'BDS' && $parts[0] !== 'CODS') return;
-		if($parts[1] == "BOTCHECK" && $parts[2] === 'DIRECT')
-			if(strtolower($parts[3]) !== strtolower($this->Bot->username)) return;
+		if($parts[1] == "BOTCHECK" && $parts[2] === 'DIRECT') {
+			if(!strstr($parts[3], ',') && strtolower($parts[3]) !== strtolower($this->Bot->username)) return;
+			if(strstr($parts[3], ',')) {
+				$check = explode(',', $parts[3]);
+				if(!in_array($this->Bot->username, $check)) return;
+			}
+		}
 		if($parts[1] == "BOTCHECK" && $parts[2] === 'ALL')
 			if($this->dAmn->chat['chat:DataShare']['member'][$from]['pc'] !== 'PoliceBot') return;
 		if($parts[1] == "BOTCHECK" && $parts[2] === 'NODATA' && isset($parts[3])) {
@@ -614,10 +619,14 @@ class System_commands extends extension {
 	function c_trigger($ns, $from, $message, $target) {
 		$trig = args($message,1, true);
 		if($trig!=''&&$trig!=$this->Bot->trigger) {
-			$this->Bot->trigger = $trig;
-			$this->Bot->save_config();
-			$say = $from.': Trigger changed to <code>'.$trig.'</code>!';
-			$this->dAmn->npmsg('chat:datashare', 'BDS:BOTCHECK:RESPONSE:'.$from.','.$this->Bot->owner.','.$this->Bot->info['name'].','.$this->Bot->info['version'].'/'.$this->Bot->info['bdsversion'].','.md5(strtolower(str_replace(' ', '', htmlspecialchars_decode($this->Bot->trigger, ENT_NOQUOTES)).$from.$this->Bot->username)).','.$this->Bot->trigger, TRUE);
+			if(strlen($trig) < 2)
+				$say = $from.': Trigger must be at least 2 characters';
+			else {
+				$this->Bot->trigger = $trig;
+				$this->Bot->save_config();
+				$say = $from.': Trigger changed to <code>'.$trig.'</code>!';
+				$this->dAmn->npmsg('chat:datashare', 'BDS:BOTCHECK:RESPONSE:'.$from.','.$this->Bot->owner.','.$this->Bot->info['name'].','.$this->Bot->info['version'].'/'.$this->Bot->info['bdsversion'].','.md5(strtolower(str_replace(' ', '', htmlspecialchars_decode($this->Bot->trigger, ENT_NOQUOTES)).$from.$this->Bot->username)).','.$this->Bot->trigger, TRUE);
+			}
 		} elseif($trig==$this->Bot->trigger) $say = $from.': Cannot change trigger to the same as current';
 		else $say = $from.': Use this command to change your trigger.';
 		$this->dAmn->say($target, $say);
@@ -783,11 +792,14 @@ class System_commands extends extension {
 		$pay = explode(',', $parts[3], 2);
 		$version = $payload[1];
 		$released = $payload[2];
+		$ov_arr = explode('.', $this->Bot->info['version']);
+		$nv_arr = explode('.', $version);
+		$newer = (intval($ov_arr[0]) <= intval($nv_arr[0]) && intval($ov_arr[1]) <= intval($nv_arr[1]) && (intval($ov_arr[2]) < intval($nv_arr[2]) || intval($ov_arr[1]) < intval($nv_arr[1])));
 
 		if(empty($version) || empty($released)) return;
 
 		if($pay[0] == $this->Bot->username || strstr($pay[0], 'ALL')) {
-			if($this->Bot->info['version'] < $version && $from == 'Botdom') {
+			if($newer && $from == 'Botdom') {
 				$this->botversion['latest'] = false;
 				if($this->Bot->autoupdate == false) {
 					if(strstr($pay[0], 'ALL'))
