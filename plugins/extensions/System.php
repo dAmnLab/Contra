@@ -35,6 +35,7 @@ class System_commands extends extension {
 		$mods = array('modules', 'mods');
 		$mod = array('module', 'mod');
 		$aj = array('autojoin', 'aj');
+		$netusage = array('netusage', 'netinfo');
 
 		$this->addCmd('about', 'c_about');
 		$this->addCmd('system', 'c_about');
@@ -53,6 +54,7 @@ class System_commands extends extension {
 		$this->addCmd('credits', 'c_credits');
 		$this->addCmd('botinfo', 'c_botinfo', 50);
 		$this->addCmd('update', 'c_update', 100);
+		$this->addCmd($netusage, 'c_netusage', 0);
 
 		$this->addCmd('sudo', 'c_sudo', 100); // Lololololololololol.
 
@@ -73,6 +75,7 @@ class System_commands extends extension {
 		$this->cmdHelp('credits', 'Here lies the persons whom helped in the creation of Contra.');
 		$this->cmdHelp('botinfo', 'Lists information on a specific bot.');
 		$this->cmdHelp('update', 'Updates Contra to latest version. Only works if the bot\'s current version is below the released version');
+		$this->cmdHelp($netusage, 'Displays information on the bots network usage.');
 
 		$this->cmdHelp(
 			'sudo',
@@ -532,15 +535,15 @@ class System_commands extends extension {
 					$sb .= "</sub><abbr title=\"{$requestor}\"> </abbr>";
 
 					$dAmn->say($ns, $sb);
-				} elseif($parts[2] === 'NODATA') {
+				} elseif($parts[2] === 'NODATA' || $parts[2] === 'CLIENTINFO' || $parts[2] === 'BADCLIENT') {
 					$dAmn->say($ns, "Sorry, {$requestor}, there is no information on <b>{$bot}</b> in the database.");
 				}
-			}, 'BDS:BOTCHECK:(NODATA|INFO|BADBOT):' . $bot . '*');
+			}, 'BDS:BOTCHECK:(NODATA|INFO|CLIENTINFO|BADBOT|BADCLIENT):' . $bot . '*');
 		}
 	}
 
 	function e_botcheck($parts, $from, $message) {
-		if(!isset($parts[3])) return;
+		if(!isset($parts[2])) return;
 		if(isset($parts[0]) && $parts[0] !== 'BDS' && $parts[0] !== 'CODS') return;
 		if($parts[1] == "BOTCHECK" && $parts[2] === 'DIRECT') {
 			if(!strstr($parts[3], ',') && strtolower($parts[3]) !== strtolower($this->Bot->username)) return;
@@ -744,6 +747,15 @@ class System_commands extends extension {
 		// Everything seems to be in order, let's update!~
 		$this->dAmn->say($ns, "{$requestor}: Now updating. Bot will be shutdown after update is complete.");
 		$this->doupdate($requestor, $message);
+	}
+
+	function c_netusage($ns, $from, $message, $target) {
+		if(strtolower(args($message, 1)) == 'reset') {
+			if(!$this->user->has($from, 99)) return $this->dAmn->say($ns, $from.': You do not have access to this command.');
+			$this->dAmn->bytes_sent = 0;
+			$this->dAmn->bytes_recv = 0;
+			$this->dAmn->say($ns, $from.': Network Usage stats reseted.');
+		}else $this->dAmn->say($ns, '<b>Bytes sent:</b> '.FormatBytes($this->dAmn->bytes_sent).'<br/><b>Bytes received:</b> '.FormatBytes($this->dAmn->bytes_recv).'<abbr title=" '.$from.': "></abbr>');
 	}
 
 	function doupdate($requestor, $message) {
