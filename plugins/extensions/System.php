@@ -41,7 +41,7 @@ class System_commands extends extension {
 		$this->addCmd('system', 'c_about');
 		$this->addCmd('uptime', 'c_about');
 		$this->addCmd($cmds, 'c_commands');
-		$this->addCmd($cmd, 'c_command', 99);
+		$this->addCmd($cmd, 'c_command', 100);
 		$this->addCmd($mods, 'c_modules', 50);
 		$this->addCmd($mod, 'c_module', 99);
 		$this->addCmd('users', 'c_users', 50);
@@ -86,9 +86,8 @@ class System_commands extends extension {
 		$this->hook('e_trigcheck', 'recv_msg');
 		$this->hook('load_switches', 'startup');
 
-		$this->hookBDS('e_botcheck', 'BDS:BOTCHECK:(DIRECT|ALL|NODATA)');
-		$this->hookBDS('e_botcheck', 'CODS:BOTCHECK:ALL');
-
+		$this->hookBDS('e_botcheck', '^BDS:BOTCHECK:(DIRECT|ALL|NODATA):*$');
+		$this->hookBDS('e_botcheck', '^CODS:BOTCHECK:ALL$');
 		$this->hookBDS('e_codsnotify', 'CODS:VERSION:NOTIFY');
 
 		$this->loadnotes();
@@ -230,6 +229,7 @@ class System_commands extends extension {
 				foreach($this->user->list['pc'] as $num => $name) {
 					$modline = '<br/>&nbsp;-<b> '.$name.':</b> ';
 					$cmds = '';
+					$cmdarr = array();
 					foreach($this->Bot->Events->events['cmd'] as $cmd => $cmda) {
 						if(array_key_exists($cmd, $this->user->list['override']['command']))
 							$priv_level = $this->user->list['override']['command'][$cmd];
@@ -238,11 +238,14 @@ class System_commands extends extension {
 							if($this->user->hasCmd($from,$cmd) || $all) {
 								if($cmd != 'mod' && $cmd != 'mods' && $cmd != 'aj' && $cmd != 'e' && $cmd != 'cmd' && $cmd != 'cmds') {
 									$off = (($cmda['s']===false||$this->Bot->mod[$cmda['m']]->status===false)?true:false);
-									$cmds.= ($off?'<i><code>':'').$cmd.
-									($off?'</code></i>':'').', ';
+									$cmdarr[$cmd] = ($off?'<i><code>'.$cmd.'</code></i>':$cmd);
 								}
 							}
 						}
+					}
+					sort($cmdarr);
+					foreach ($cmdarr as $k => $cmd) {
+						$cmds .= $cmd . ', ';
 					}
 					if(!empty($cmds)) $say.= $modline.rtrim($cmds, ', ');
 				}
@@ -588,6 +591,7 @@ class System_commands extends extension {
 				else {
 					$this->Bot->autojoin[] = $ans;
 					$say = $from.': Added '.$ans.' to your autojoin list.';
+					$this->dAmn->join($this->dAmn->format_chat($ans));
 				}
 				$this->Bot->save_config();
 				break;
@@ -605,6 +609,7 @@ class System_commands extends extension {
 				else {
 					$this->Bot->autojoin = array_del_key($this->Bot->autojoin, $rnsid);
 					$say = $from.': Removed '.$rns.' from your autojoin list.';
+					$this->dAmn->part($this->dAmn->format_chat($rns));
 				}
 				$this->Bot->save_config();
 				break;
