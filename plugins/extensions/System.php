@@ -86,7 +86,8 @@ class System_commands extends extension {
 		$this->hook('e_trigcheck', 'recv_msg');
 		$this->hook('load_switches', 'startup');
 
-		$this->hookBDS('e_botcheck', '^BDS:BOTCHECK:(DIRECT|ALL|NODATA):*$');
+		$this->hookBDS('e_botcheck', '^BDS:BOTCHECK:(DIRECT|NODATA|OK|DENIED):*$');
+		$this->hookBDS('e_botcheck', '^BDS:BOTCHECK:ALL$');
 		$this->hookBDS('e_botcheck', '^CODS:BOTCHECK:ALL$');
 		$this->hookBDS('e_codsnotify', 'CODS:VERSION:NOTIFY');
 
@@ -545,9 +546,9 @@ class System_commands extends extension {
 		}
 	}
 
-	function e_botcheck($parts, $from, $message) {
+	function e_botcheck($ns, $parts, $from, $message) {
 		if(!isset($parts[2])) return;
-		if(isset($parts[0]) && $parts[0] !== 'BDS' && $parts[0] !== 'CODS') return;
+		if($parts[0] !== 'BDS' && $parts[0] !== 'CODS') return;
 		if($parts[1] == "BOTCHECK" && $parts[2] === 'DIRECT') {
 			if(!strstr($parts[3], ',') && strtolower($parts[3]) !== strtolower($this->Bot->username)) return;
 			if(strstr($parts[3], ',')) {
@@ -555,11 +556,30 @@ class System_commands extends extension {
 				if(!in_array($this->Bot->username, $check)) return;
 			}
 		}
-		if($parts[1] == "BOTCHECK" && $parts[2] === 'ALL')
+		if($parts[1] == "BOTCHECK" && $parts[2] === 'ALL') {
+			if($ns != 'chat:DataShare') return;
 			if($this->dAmn->chat['chat:DataShare']['member'][$from]['pc'] !== 'PoliceBot') return;
+		}
 		if($parts[1] == "BOTCHECK" && $parts[2] === 'NODATA' && isset($parts[3])) {
+			if($ns != 'chat:DataShare') return;
 			if($this->dAmn->chat['chat:DataShare']['member'][$from]['pc'] !== 'PoliceBot') return;
 			if(strtolower($parts[3]) !== strtolower($this->Bot->username)) return;
+		}
+		if($parts[1] == "BOTCHECK" && $parts[2] === 'OK' ) {
+			if($ns != 'chat:DSGateway') return;
+			if($this->dAmn->chat['chat:DSGateway']['member'][$from]['pc'] !== 'PoliceBot') return;
+			if(strtolower($parts[3]) !== strtolower($this->Bot->username)) return;
+			$this->dAmn->join('chat:DataShare');
+			$this->dAmn->part('chat:DSGateway');
+			return;
+		}
+		if($parts[1] == "BOTCHECK" && $parts[2] === 'DENIED' ) {
+			if($ns != 'chat:DSGateway') return;
+			if($this->dAmn->chat['chat:DSGateway']['member'][$from]['pc'] !== 'PoliceBot') return;
+			$part = explode(',', $parts[3]);
+			if(strtolower($part[0]) !== strtolower($this->Bot->username)) return;
+			$this->dAmn->part('chat:DSGateway');
+			return;
 		}
 
 			$response = $parts[0].':BOTCHECK:RESPONSE:' . $from . ',' .
@@ -572,7 +592,7 @@ class System_commands extends extension {
 							$this->Bot->username
 						)) . ',' .
 						$this->Bot->trigger;
-		$this->dAmn->npmsg('chat:datashare', $response, TRUE);
+		$this->dAmn->npmsg($ns, $response, TRUE);
 	}
 
 	function c_autojoin($ns, $from, $message, $target) {
