@@ -19,11 +19,11 @@ class Bot {
 	public $start;
 	public $info = array(
 		'name' => 'Contra',
-		'version' => '5.6.2',
+		'version' => '5.6.3',
 		'status' => '',
 		'release' => 'stable',
 		'author' => 'photofroggy',
-		'bdsversion' => '0.3',
+		'bdsversion' => '0.4',
 	);
 	public $username;
 	public $owner;
