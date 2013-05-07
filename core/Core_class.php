@@ -19,7 +19,7 @@ class Bot {
 	public $start;
 	public $info = array(
 		'name' => 'Contra',
-		'version' => '5.6.4',
+		'version' => '5.6.5',
 		'status' => '',
 		'release' => 'stable',
 		'author' => 'photofroggy',
@@ -234,11 +234,17 @@ class Bot {
 			'http://'.$this->owner.'.deviantart.com'
 		);
 		fclose($socket);
-		if (($pos = strpos($response, 'HTTP/1.1 200 OK')) === false) {
+		if (($pos = strpos($response, 'HTTP/1.1 200 OK')) === false && ($pos = strpos($response, 'HTTP/1.1 302 Moved')) === false) {
 			$this->Console->Warning('ERROR: Bot Owner does not exist. Check your bot\'s config.cf');
-			$this->dAmn->close=true;
+			$this->dAmn->close = true;
 			$this->dAmn->disconnect();
 			return;
+		}
+              	if (strstr($response, 'HTTP/1.1 302 Moved')) {
+			$headers = get_headers("http://{$this->owner}.deviantart.com/", 1);
+			if (isset($headers['Location'])) {
+				$this->owner = preg_replace('/https?:\/\/([^\.]+)\.deviantart\.com\/(.*)?/i', '$1', $headers['Location']);
+			}
 		}
 		if (!$this->damntoken) {
 			$this->Console->Notice('Retrieving dAmn Token. This may take a while...');
