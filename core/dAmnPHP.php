@@ -123,7 +123,7 @@ class dAmnPHP {
 			"/&link\t([^\t]+)\t([^\t]+)\t&\t/",
 			"/&dev\t[^\t]\t([^\t]+)\t/",
 			"/&avatar\t(.*?)\t(.*?)\t/",
-			"/&thumb\t([0-9]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t/",
+			"/&thumb\t([0-9]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t/",
 			"/&img\t([^\t]+)\t([^\t]*)\t([^\t]*)\t/",
 			"/&iframe\t([^\t]+)\t([0-9%]*)\t([0-9%]*)\t&\/iframe\t/",
 			"/&acro\t([^\t]+)\t/",
@@ -347,7 +347,7 @@ class dAmnPHP {
 	    try
 	    {
 		$headers = '';
-		if(isset($post)) {
+		if (isset($post)) {
 			$headers .= "POST $url HTTP/1.1\r\n";
 		} else {
 			$headers .= "GET $url HTTP/1.1\r\n";
@@ -668,7 +668,9 @@ function sort_dAmn_packet($packet) {
 		case 'part':
 			$data['event'] = $packet['cmd'];
 			$data['p'][1] = $packet['args']['e'];
-			if(array_key_exists('r', $packet['args'])) $data['p'][2] = $packet['args']['r'];
+			if (array_key_exists('r', $packet['args'])) {
+				$data['p'][2] = $packet['args']['r'];
+			}
 			break;
 		case 'property':
 			$data['event'] = 'property';

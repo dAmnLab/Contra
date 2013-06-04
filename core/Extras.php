@@ -95,5 +95,96 @@
 
 		return implode(', ', $fmt);
 	}
+    
+    function FormatTime($seconds) {
+        $years      = 0;
+        $weeks      = 0;
+        $days       = 0;
+        $hours      = 0;
+        $minutes    = 0;
+        $seconds    = round($seconds);
+        $output     = '';
+        
+        if ($seconds <= 0) return '0 seconds';
+        
+        while ($seconds >= 31556926) {
+            $years++;
+            $seconds -= 31556926;
+        }
+        
+        while ($seconds >= 604800) {
+            $weeks++;
+            $seconds -= 604800;
+        }
+        
+        while ($seconds >= 86400) {
+            $days++;
+            $seconds -= 86400;
+        }
+        
+        while ($seconds >= 3600) {
+            $hours++;
+            $seconds -= 3600;
+        }
+        
+        while ($seconds >= 60) {
+            $minutes++;
+            $seconds -= 60;
+        }
+        
+        if ($years   > 0) $output .= $years.   ' year'.   ($years   == 1 ? '' : 's') . ', ';
+        if ($weeks   > 0) $output .= $weeks.   ' week'.   ($weeks   == 1 ? '' : 's') . ', ';
+        if ($days    > 0) $output .= $days.    ' day'.    ($days    == 1 ? '' : 's') . ', ';
+        if ($hours   > 0) $output .= $hours.   ' hour'.   ($hours   == 1 ? '' : 's') . ', ';
+        if ($minutes > 0) $output .= $minutes. ' minute'. ($minutes == 1 ? '' : 's') . ', ';
+        if ($seconds > 0) $output .= $seconds. ' second'. ($seconds == 1 ? '' : 's') . ', ';
+        
+        return substr($output, 0, -2);
+    }
+
+    /* Deviant info function
+     * 2008-2013 Justin Eittreim
+     * http://divinityarcane.deviantart.com/ */
+    function deviant_info($user) {
+        $url  = 'http://'.$user.'.deviantart.com/';
+        $page = file_get_contents($url) or null;
+
+        if ($page == null) return null;
+        
+        $patt = '%(<title>(?P<username>[^\s]+) on deviantART</title>)|(<strong>(?P<number>[^<]+)</strong>(?P<type>[^\t]+))|(<div id="super-secret-\w+"[^>]*>(?P<tagline>[^<]+))|(<d. class="f h">(?P<item>[^<]+)</d.>)|(<div>Deviant for (?P<years>[^<]+)</div><div>(?P<member>[^<]+)</div>)%';
+        $data = array('info'=>array());
+        $type = 0;
+        $tnls = array(1=>'Type', 2=>'Name', 3=>'ASL');
+        
+        foreach (explode("\n", $page) as $line) {
+            preg_match_all($patt, $line, $matches);
+            
+            if (count($matches['item']) > 0 && strlen($matches['item'][0]) > 0) {
+                if (count($matches['item']) == 1)
+                    $data[$tnls[++$type]] = $matches['item'][0];
+                else if (strlen($matches['item'][0]) <= 32)
+                    $data[$matches['item'][0]] = $matches['item'][1];
+
+            } else if (count($matches['tagline']) > 0 && strlen($matches['tagline'][0]) > 0) {
+                $data['Tagline'] = $matches['tagline'][0];
+            
+            } else if (count($matches['username']) > 0 && strlen($matches['username'][0]) > 0) {
+                $data['Username'] = str_replace('#', '', $matches['username'][0]);
+            
+            } else if (count($matches['years']) > 0 && strlen($matches['years'][0]) > 0) {
+                $data['Joined'] = 'Deviant for '.preg_replace('%\s+%', ' ', $matches['years'][0]);
+                $data['Member'] = $matches['member'][0];
+            
+            } else if (count($matches['number']) > 0 && strlen($matches['number'][0]) > 0) {
+                $t = strip_tags(trim($matches['type'][0]));
+                if (strlen($t) < 1) continue;
+                if (strstr($t, '   ')) $t = substr($t, 0, strpos($t, '   '));
+		if (strlen($t) > 5 && strlen($t) <= 32)
+			$data['info'][$t] = $matches['number'][0];
+            }
+        }
+
+        return $data;
+    }
 
 ?>
