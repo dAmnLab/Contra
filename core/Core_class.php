@@ -19,7 +19,7 @@ class Bot {
 	public $start;
 	public $info = array(
 		'name' => 'Contra',
-		'version' => '5.6.6',
+		'version' => '5.7.0',
 		'status' => '',
 		'release' => 'stable',
 		'author' => 'photofroggy',
@@ -241,7 +241,7 @@ class Bot {
 			return;
 		}
               	if (strstr($response, 'HTTP/1.1 302 Moved')) {
-			$headers = get_headers("http://{$this->owner}.deviantart.com/", 1);
+			$headers = get_headers('http://'.$this->owner.'.deviantart.com/', 1);
 			if (isset($headers['Location'])) {
 				$this->owner = preg_replace('/https?:\/\/([^\.]+)\.deviantart\.com\/(.*)?/i', '$1', $headers['Location']);
 			}

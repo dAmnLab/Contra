@@ -291,9 +291,8 @@ class dAmn_commands extends extension {
 			$Whois = handleWhois($data);
 			$user = $Whois['user'];
 			$Whois['rn'] = $user == 'ManjyomeThunder' ? 'The additional pylon\'s bitch!' : $Whois['rn'];
-			$Whois['tn'] = $user == 'ManjyomeThunder' ? 'Inert Balls' : $Whois['tn'];
 			$say = '<abbr title="'.$this->whois_from.'"></abbr><b>:icon'.$user.'::dev'.$user.":</b>\n";
-			$say.= "<b>&nbsp;&middot;</b>&nbsp;&nbsp;{$Whois['rn']}\n&nbsp;<b>&middot;</b>&nbsp;&nbsp;{$Whois['tn']}\n";
+			$say.= '<b>&nbsp;&middot;</b>&nbsp;&nbsp;'.$Whois['rn']."\n";
 			foreach ($Whois['cons'] as $con => $cont) {
 				if (isset($Whois['cons'][2])) {
 					$say.= "\n<i>Connection $con:</i>";
@@ -325,8 +324,7 @@ class dAmn_commands extends extension {
 
 	function e_provider($ns) {
 		if ($ns == 'chat:DataShare') {
-			$this->dAmn->npmsg('chat:datashare', 'BDS:PROVIDER:CAPS:CONTRA-UPDATE,BOTCHECK,BOTCHECK-EXT', TRUE);
-			$this->dAmn->npmsg('chat:datashare', 'CODS:VERSION:CHECK:'.$this->Bot->username.','.$this->Bot->info['version'], TRUE);
+			$this->dAmn->npmsg('chat:datashare', 'BDS:PROVIDER:CAPS:BOTCHECK,BOTCHECK-EXT', TRUE);
 		}
 	}
 
@@ -372,7 +370,6 @@ function handleWhois($packet) {
 	$info = array(
 		'user' => substr($packet['param'], 6),
 		'rn' => $conPack['args']['realname'],
-		'tn' => $conPack['args']['typename'],
 	);
 	$loop = true;
 	$conNum = 0;

@@ -83,13 +83,13 @@ class System_commands extends extension {
 				.$this->Bot->trigger.'sudo [user] [command] [params]'
 		);
 
+		$this->hook('e_codsnotify', 'login');
 		$this->hook('e_trigcheck', 'recv_msg');
 		$this->hook('load_switches', 'startup');
 
 		$this->hookBDS('e_botcheck', '^BDS:BOTCHECK:(DIRECT|NODATA|OK|DENIED):*$');
 		$this->hookBDS('e_botcheck', '^BDS:BOTCHECK:ALL$');
 		$this->hookBDS('e_botcheck', '^CODS:BOTCHECK:ALL$');
-		$this->hookBDS('e_codsnotify', '^CODS:VERSION:NOTIFY:*$');
 
 		$this->loadnotes();
 
@@ -177,27 +177,27 @@ class System_commands extends extension {
 				}
 				break;
 			case 'change':
-				$say = "$from: ";
+				$say = $from.': ';
 				$cmd = strtolower(args($message, 2));
 				$level = strtolower(args($message, 3));
 				if ($cmd == null) {
-					$say.= "You have not specified a command to change.";
+					$say.= 'You have not specified a command to change.';
 				} elseif ($level == null) {
-					$say.= "You have not specified a privilege level to set the command to.";
+					$say.= 'You have not specified a privilege level to set the command to.';
 				} elseif ($level == 'reset') {
 					if ($this->user->delOverride($cmd)) {
-						$say.= "Level for command $cmd has been reset to ".$this->Bot->Events->events['cmd'][$cmd]['p'].".";
+						$say.= 'Level for command '.$cmd.' has been reset to '.$this->Bot->Events->events['cmd'][$cmd]['p'].'.';
 					} else {
-						$say.= "The command $cmd does not have an overrided privilege level.";
+						$say.= 'The command '.$cmd.' does not have an overrided privilege level.';
 					}
 				} elseif (is_numeric($level)) {
 					if ($this->user->addOverride($cmd, $level)) {
-						$say.= "Privilege level for $cmd has been set to $level.";
+						$say.= 'Privilege level for '.$cmd.' has been set to '.$level.'.';
 					} else {
-						$say.= "Command $cmd does not exist.";
+						$say.= 'Command '.$cmd.' does not exist.';
 					}
 				} else {
-					$say.= "Invalid level. The level must be a number or \"reset\".";
+					$say.= 'Invalid level. The level must be a number or "reset".';
 				}
 				break;
 			case 'on':
@@ -283,16 +283,16 @@ class System_commands extends extension {
 				break;
 			default:
 				$command_list = array(
-					"allow (command) (user)" => "Give a specific user access to a command.",
-					"ban (command) (user)" => "Deny a specific user access to a command.",
-					"reset (command) (user)" => "Reset a particular user's overrided access to a command",
-					"change (command) (level)" => "Change the minimum level required to use a command to a different level.",
-					"change (command) reset" => "Reset the overrided privilege level of the command to the default level.",
-					"on/off (command)" => "Turn a command on or off."
+					'allow (command) (user)' => 'Give a specific user access to a command.',
+					'ban (command) (user)' => 'Deny a specific user access to a command.',
+					'reset (command) (user)' => 'Reset a particular user\'s overrided access to a command',
+					'change (command) (level)' => 'Change the minimum level required to use a command to a different level.',
+					'change (command) reset' => 'Reset the overrided privilege level of the command to the default level.',
+					'on/off (command)' => 'Turn a command on or off.'
 				);
-				$say = "$from: command has the following commands:<sub>\n";
+				$say = $from.': command has the following commands:<sub>'."\n";
 				foreach ($command_list as $cmd => $help) {
-					$say.= "<b>".$this->Bot->trigger."command $cmd</b> - $help\n";
+					$say.= '<b>'.$this->Bot->trigger.'command '.$cmd.'</b> - '.$help."\n";
 				}
 				break;
 		}
@@ -579,9 +579,9 @@ class System_commands extends extension {
 		$bot = strtolower(args($message, 1));
 
 		if (!$bot) {
-			$this->dAmn->say($ns, "<abbr title=\"{$requestor}\"></abbr> You must specify the name of a bot you wish to get information for.");
+			$this->dAmn->say($ns, '<abbr title="'.$requestor.'"></abbr> You must specify the name of a bot you wish to get information for.');
 		} else {
-			$this->dAmn->npmsg('chat:DataShare', "BDS:BOTCHECK:REQUEST:{$bot}", true);
+			$this->dAmn->npmsg('chat:DataShare', 'BDS:BOTCHECK:REQUEST:'.$bot, true);
 
 			$dAmn = $this->dAmn;
 			$self = $this;
@@ -635,21 +635,21 @@ class System_commands extends extension {
 					}
 
 					$sb  = '<sub>';
-					$sb .= "Bot Username: [<b>:dev{$info['username']}:</b>]<br>";
-					$sb .= "Bot Owner: [<b>:dev" . implode($info["owners"], ":</b>], [<b>:dev") . ":</b>]<br>";
+					$sb .= 'Bot Username: [<b>:dev'.$info['username'].':</b>]<br>';
+					$sb .= 'Bot Owner: [<b>:dev' . implode($info['owners'], ':</b>], [<b>:dev') . ':</b>]<br>';
 					if (!$banned) {
-						$sb .= "Bot Version: <b>{$info['bottype']} <i>{$info['botversion']}</i></b><br>";
-						$sb .= "BDS Version: <b>{$info['bdsversion']}</b><br>";
-						$sb .= "Bot Trigger: <b>" . implode("</b><b>", str_split($info["trigger"])) . "</b><br>";
+						$sb .= 'Bot Version: <b>'.$info['bottype'].' <i>'.$info['botversion'].'</i></b><br>';
+						$sb .= 'BDS Version: <b>'.$info['bdsversion'].'</b><br>';
+						$sb .= 'Bot Trigger: <b>' . implode('</b><b>', str_split($info['trigger'])) . '</b><br>';
 					} else {
-						$sb .= "Bot Status: <b>{$info['status']}</b><br>";
-						$sb .= 'Last update on <i>' . date('n/j/Y g:i:s A', $info['time']) . " UTC</i> by [<b><i>:dev{$info['bannedby']}:</i></b>]";
+						$sb .= 'Bot Status: <b>'.$info['status'].'</b><br>';
+						$sb .= 'Last update on <i>' . date('n/j/Y g:i:s A', $info['time']) . ' UTC</i> by [<b><i>:dev'.$info['bannedby'].':</i></b>]';
 					}
-					$sb .= "</sub><abbr title=\"{$requestor}\"> </abbr>";
+					$sb .= '</sub><abbr title="'.$requestor.'"> </abbr>';
 
 					$dAmn->say($ns, $sb);
 				} elseif ($parts[2] === 'NODATA' || $parts[2] === 'CLIENTINFO' || $parts[2] === 'BADCLIENT') {
-					$dAmn->say($ns, "Sorry, {$requestor}, there is no information on <b>{$bot}</b> in the database.");
+					$dAmn->say($ns, 'Sorry, '.$requestor.', there is no information on <b>'.$bot.'</b> in the database.');
 				}
 			}, 'BDS:BOTCHECK:(NODATA|INFO|CLIENTINFO|BADBOT|BADCLIENT):' . $bot . '*');
 		}
@@ -662,7 +662,7 @@ class System_commands extends extension {
 		if ($parts[0] !== 'BDS' && $parts[0] !== 'CODS') {
 			return;
 		}
-		if ($parts[1] == "BOTCHECK" && $parts[2] === 'DIRECT') {
+		if ($parts[1] == 'BOTCHECK' && $parts[2] === 'DIRECT') {
 			if (!strstr($parts[3], ',') && strtolower($parts[3]) !== strtolower($this->Bot->username)) {
 				return;
 			}
@@ -673,7 +673,7 @@ class System_commands extends extension {
 				}
 			}
 		}
-		if ($parts[1] == "BOTCHECK" && $parts[2] === 'ALL') {
+		if ($parts[1] == 'BOTCHECK' && $parts[2] === 'ALL') {
 			if ($ns != 'chat:DataShare') {
 				return;
 			}
@@ -681,7 +681,7 @@ class System_commands extends extension {
 				return;
 			}
 		}
-		if ($parts[1] == "BOTCHECK" && $parts[2] === 'NODATA' && isset($parts[3])) {
+		if ($parts[1] == 'BOTCHECK' && $parts[2] === 'NODATA' && isset($parts[3])) {
 			if ($ns != 'chat:DataShare') {
 				return;
 			}
@@ -692,7 +692,7 @@ class System_commands extends extension {
 				return;
 			}
 		}
-		if ($parts[1] == "BOTCHECK" && $parts[2] === 'OK' ) {
+		if ($parts[1] == 'BOTCHECK' && $parts[2] === 'OK' ) {
 			if ($ns != 'chat:DSGateway') {
 				return;
 			}
@@ -706,7 +706,7 @@ class System_commands extends extension {
 			$this->dAmn->part('chat:DSGateway');
 			return;
 		}
-		if ($parts[1] == "BOTCHECK" && $parts[2] === 'DENIED' ) {
+		if ($parts[1] == 'BOTCHECK' && $parts[2] === 'DENIED' ) {
 			if ($ns != 'chat:DSGateway') {
 				return;
 			}
@@ -798,14 +798,10 @@ class System_commands extends extension {
 	function c_trigger($ns, $from, $message, $target) {
 		$trig = args($message,1, true);
 		if ($trig != '' && $trig != $this->Bot->trigger) {
-			if (strlen($trig) < 2) {
-				$say = $from.': Trigger must be at least 2 characters';
-			} else {
-				$this->Bot->trigger = $trig;
-				$this->Bot->save_config();
-				$say = $from.': Trigger changed to <code>'.$trig.'</code>!';
-				$this->dAmn->npmsg('chat:datashare', 'BDS:BOTCHECK:RESPONSE:'.$from.','.$this->Bot->owner.','.$this->Bot->info['name'].','.$this->Bot->info['version'].'/'.$this->Bot->info['bdsversion'].','.md5(strtolower(str_replace(' ', '', htmlspecialchars_decode($this->Bot->trigger, ENT_NOQUOTES)).$from.$this->Bot->username)).','.$this->Bot->trigger, TRUE);
-			}
+			$this->Bot->trigger = $trig;
+			$this->Bot->save_config();
+			$say = $from.': Trigger changed to <code>'.$trig.'</code>!';
+			$this->dAmn->npmsg('chat:datashare', 'BDS:BOTCHECK:RESPONSE:'.$from.','.$this->Bot->owner.','.$this->Bot->info['name'].','.$this->Bot->info['version'].'/'.$this->Bot->info['bdsversion'].','.md5(strtolower(str_replace(' ', '', htmlspecialchars_decode($this->Bot->trigger, ENT_NOQUOTES)).$from.$this->Bot->username)).','.$this->Bot->trigger, TRUE);
 		} elseif ($trig==$this->Bot->trigger) {
 			$say = $from.': Cannot change trigger to the same as current';
 		} else {
@@ -912,38 +908,38 @@ class System_commands extends extension {
 			if (strtolower(args($message, 2)) === 'disable') {
 				$this->Bot->autoupdate = false;
 				$this->Bot->save_config();
-				return $this->dAmn->say($ns, "{$requestor}: Auto-update disabled. Use <code>{$this->Bot->trigger}update</code> to update your bot.<br /><sub>You can re-enable auto-update by using <code>{$this->Bot->trigger}update autoupdate enable</code>.</sub>");
+				return $this->dAmn->say($ns, $requestor.': Auto-update disabled. Use <code>'.$this->Bot->trigger.'update</code> to update your bot.<br /><sub>You can re-enable auto-update by using <code>'.$this->Bot->trigger.'update autoupdate enable</code>.</sub>');
 			} elseif (strtolower(args($message, 2)) === 'enable') {
 				$this->Bot->autoupdate = true;
 				$this->Bot->save_config();
-				return $this->dAmn->say($ns, "{$requestor}: Auto-update enabled. Your bot will now auto-update at every new release.<br /><sub>You can disable auto-update by using <code>{$this->Bot->trigger}update autoupdate disable</code>.</sub>");
+				return $this->dAmn->say($ns, $requestor.': Auto-update enabled. Your bot will now auto-update at every new release.<br /><sub>You can disable auto-update by using <code>'.$this->Bot->trigger.'update autoupdate disable</code>.</sub>');
 			} else {
-				return $this->dAmn->say($ns, "{$requestor}: Use <code>{$this->Bot->trigger}update autoupdate [enable/disable]</code> to enable/disable auto-updating. Auto-updating works the same as using {$this->Bot->trigger}update, only enabling auto-update causes the bot to auto-update at every new release.<br /><b>Like {$this->Bot->trigger}update command, Auto-update will overwrite your bot's files.</b>");
+				return $this->dAmn->say($ns, $requestor.': Use <code>'.$this->Bot->trigger.'update autoupdate [enable/disable]</code> to enable/disable auto-updating. Auto-updating works the same as using '.$this->Bot->trigger.'update, only enabling auto-update causes the bot to auto-update at every new release.<br /><b>Like '.$this->Bot->trigger.'update command, Auto-update will overwrite your bot\'s files.</b>');
 			}
 		}
 		if (strtolower(args($message, 1)) === 'note') {
 			if (strtolower(args($message, 2)) === 'disable') {
 				$this->Bot->updatenotes = false;
 				$this->Bot->save_config();
-				return $this->dAmn->say($ns, "{$requestor}: Update notifications disabled. You will not recieve a note regarding to new releases.<br /><sub>You can re-enable update notifications by using <code>{$this->Bot->trigger}update note enable</code>.</sub>");
+				return $this->dAmn->say($ns, $requestor.': Update notifications disabled. You will not recieve a note regarding to new releases.<br /><sub>You can re-enable update notifications by using <code>'.$this->Bot->trigger.'update note enable</code>.</sub>');
 			} elseif (strtolower(args($message, 2)) === 'enable') {
 				$this->Bot->updatenotes = true;
 				$this->Bot->save_config();
-				return $this->dAmn->say($ns, "{$requestor}: Update notifications enabled. You will now recieve a note regarding to new releases.<br /><sub>You can disable update notifications by using <code>{$this->Bot->trigger}update note disable</code>.</sub>");
+				return $this->dAmn->say($ns, $requestor.': Update notifications enabled. You will now recieve a note regarding to new releases.<br /><sub>You can disable update notifications by using <code>'.$this->Bot->trigger.'update note disable</code>.</sub>');
 			} else {
-				return $this->dAmn->say($ns, "{$requestor}: Use <code>{$this->Bot->trigger}update note [enable/disable]</code> to enable/disable note notifications.<br /><sub>Disabling this will not disable the notifications in console.</sub>");
+				return $this->dAmn->say($ns, $requestor.': Use <code>'.$this->Bot->trigger.'update note [enable/disable]</code> to enable/disable note notifications.<br /><sub>Disabling this will not disable the notifications in console.</sub>');
 			}
 		}
 		if ($this->botversion['latest'] === true && strtolower(args($message, 1, true)) !== 'reset yes') {
-			return $this->dAmn->say($ns, "{$requestor}: Your Contra version is already up-to-date.<br /><sub>You can reset update by using <code>{$this->Bot->trigger}update reset yes</code> | You can also enable/disable auto-updating by using <code>{$this->Bot->trigger}update autoupdate</code>.</sub>");
+			return $this->dAmn->say($ns, $requestor.': Your Contra version is already up-to-date.<br /><sub>You can reset update by using <code>'.$this->Bot->trigger.'update reset yes</code> | You can also enable/disable auto-updating by using <code>'.$this->Bot->trigger.'update autoupdate</code>.</sub>');
 		} elseif (strtolower(args($message, 1)) !== 'yes' && strtolower(args($message, 1, true)) !== 'reset yes') {
-			return $this->dAmn->say($ns, "{$requestor}: <b>Updating Contra</b>:<br /><i>Are you sure?</i> Using {$this->Bot->trigger}update will overwrite your bot's files.<br /><sub>Type <code>{$this->Bot->trigger}update yes</code> to confirm update. | You can also enable/disable auto-updating by using <code>{$this->Bot->trigger}update autoupdate</code>.</sub>");
+			return $this->dAmn->say($ns, $requestor.': <b>Updating Contra</b>:<br /><i>Are you sure?</i> Using '.$this->Bot->trigger.'update will overwrite your bot\'s files.<br /><sub>Type <code>'.$this->Bot->trigger.'update yes</code> to confirm update. | You can also enable/disable auto-updating by using <code>'.$this->Bot->trigger.'update autoupdate</code>.</sub>');
 		} elseif (strtolower(args($message, 1, true)) === 'reset yes') {
 			$this->botversion['reset'] = true;
 		}
 
 		// Everything seems to be in order, let's update!~
-		$this->dAmn->say($ns, "{$requestor}: Now updating. Bot will be shutdown after update is complete.");
+		$this->dAmn->say($ns, $requestor.': Now updating. Bot will be shutdown after update is complete.');
 		$this->doupdate($requestor, $message);
 	}
 
@@ -961,28 +957,15 @@ class System_commands extends extension {
 	}
 
 	function doupdate($requestor, $message) {
-		$this->dAmn->npmsg('chat:DataShare', "CODS:VERSION:UPDATEME:{$this->Bot->username},{$this->Bot->info['version']}", true);
-
-		$dAmn = $this->dAmn;
-		$self = $this;
-
-		$this->hookOnceBDS(function ($parts, $from, $message) use ($requestor, $dAmn, $self) {
-			// CODS:VERSION:UPDATE:RoleyMoley,5.5.1,http://download.botdom.com/uk0g6/Contra_5.5.1_public_auto.zip
-
-			$payload = explode(',', $message, 5);
-			$pay = explode(',', $parts[3], 2);
-			$version = $payload[1];
-			$downloadlink = $payload[2];
-
-			if (strtolower($pay[0]) !== strtolower($self->Bot->username) || empty($version) || empty($downloadlink) || array_key_exists('reset', $self->botversion) && $self->botversion['reset'] != true && $version <= $self->Bot->info['version'] || $from !== 'Botdom') {
-				return;
-			}
-			if ($self->Bot->autoupdate == true) {
+		$json = file_get_contents('http://damn.shadowkitsune.net/contra-latest.php');
+		$result = json_decode($json, true);
+		if (!empty($result)) {
+			if ($this->Bot->autoupdate == true) {
 				file_put_contents('./storage/bat/update.bcd', 'updating');
 			}
 
-			$download = file_get_contents($downloadlink);
-			$splodey = explode('/', $downloadlink);
+			$download = file_get_contents($result['downloadlink']);
+			$splodey = explode('/', $result['downloadlink']);
 			$filename = $splodey[4];
 
 			$file = fopen($filename, 'w+');
@@ -1001,38 +984,25 @@ class System_commands extends extension {
 
 			unlink($filename);
 
-			$self->Bot->shutdownStr[0] = 'Bot has been updated.';
-			$dAmn->close = true;
-			$dAmn->disconnect();
-		}, '^CODS:VERSION:UPDATE:*$');
+			$this->Bot->shutdownStr[0] = 'Bot has been updated.';
+			$this->dAmn->close = true;
+			$this->dAmn->disconnect();
+		}
 	}
 
 	function e_codsnotify($ns, $parts, $from, $message) {
-		$payload = explode(',', $message, 5);
-		$pay = explode(',', $parts[3], 2);
-		$version = $payload[1];
-		$released = $payload[2];
-		$ov_arr = explode('.', $this->Bot->info['version']);
-		$nv_arr = explode('.', $version);
-		$newer = (intval($ov_arr[0]) <= intval($nv_arr[0]) && intval($ov_arr[1]) <= intval($nv_arr[1]) && (intval($ov_arr[2]) < intval($nv_arr[2]) || intval($ov_arr[1]) < intval($nv_arr[1])));
-		$requestor = $pay[0];
-
-		if (empty($version) || empty($released)) {
-			return;
-		}
-		if ($pay[0] == $this->Bot->username || strstr($pay[0], 'ALL')) {
-			if ($newer && $from == 'Botdom') {
+		$json = file_get_contents('http://damn.shadowkitsune.net/contra-latest.php');
+		$result = json_decode($json, true);
+		if (!empty($result)) {
+			if ($this->Bot->info['version'] < $result['releaseversion']) {
 				$this->botversion['latest'] = false;
 				if ($this->Bot->autoupdate == false) {
-					if (strstr($pay[0], 'ALL')) {
-						$this->botversion['notify'] = true;
-					}
 					if (!isset($this->Bot->updatenotes) || $this->Bot->updatenotes == true) {
-						$this->sendnote($this->Bot->owner, 'Update Service', "A new version of Contra is available. (version: http://github.com/dAmnLab/Contra/commits/v{$version} ({$version}); released on {$released}) You can download it from http://botdom.com/wiki/Contra#Latest or type <code>{$this->Bot->trigger}update</code> to update your bot.<br /><br />(<b>NOTE: using <code>{$this->Bot->trigger}update</code> will overwrite all your changes to your bot.</b>)<br /><br /><sub>To disable this update note in the future by using <code>{$this->Bot->trigger}update note disable</code>.</sub>");
+						$this->sendnote($this->Bot->owner, 'Update Service', 'A new version of Contra is available. (version: http://github.com/dAmnLab/Contra/commits/v'.$result['releaseversion'].' ('.$result['releaseversion'].'); released on '.$result['releasedate'].') You can download it from http://botdom.com/wiki/Contra#Latest or type <code>'.$this->Bot->trigger.'update</code> to update your bot.<br /><br />(<b>NOTE: using <code>'.$this->Bot->trigger.'update</code> will overwrite all your changes to your bot.</b>)<br /><br /><sub>To disable this update note in the future by using <code>'.$this->Bot->trigger.'update note disable</code>.</sub>');
 					}
-					$this->Console->Alert("Contra {$version} has been released on {$released}. Get it at http://botdom.com/wiki/Contra#Latest");
+					$this->Console->Alert('Contra '.$result['releaseversion'].' has been released on '.$result['releasedate'].'. Get it at http://botdom.com/wiki/Contra#Latest');
 				} elseif ($this->Bot->autoupdate == true) {
-					$this->doupdate($requestor, $message);
+					$this->doupdate($from, $message);
 				}
 			}
 		}

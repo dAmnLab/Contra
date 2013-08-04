@@ -36,9 +36,12 @@ class AntiSpam extends extension {
         $opt3       = args($message, 4);
         $trigger    = $this->Bot->trigger;
 
-        if (empty($channel) || '#' !== $channel[0]) {
-            $option = null;
-        }
+	if (substr($channel, 0, 1) != '#') {
+	    $option  = args($message, 1);
+	    $channel = $this->dAmn->deform_chat($ns);
+	    $opt2    = args($message, 2);
+	    $opt3    = args($message, 3);
+	}
 
         // What do they want to do?
         switch ($option) {
@@ -65,7 +68,7 @@ class AntiSpam extends extension {
                     'silenced_privclass'  => 'Silenced');
 
                 $this->save_data();
-                $this->dAmn->say($ns, "{$from}: Anti-Spam has been enabled for {$channel}.");
+                $this->dAmn->say($ns, $from.': Anti-Spam has been enabled for '.$channel.'.');
                 break;
 
             // User wants to disable the anti-spam module in a certain channel.
@@ -73,7 +76,7 @@ class AntiSpam extends extension {
                 $safe_chan = strtolower(substr($channel, 1));
                 unset($this->data[$safe_chan]);
                 $this->save_data();
-                $this->dAmn->say($ns, "{$from}: Anti-Spam has been disabled for {$channel}.");
+                $this->dAmn->say($ns, $from.': Anti-Spam has been disabled for '.$channel.'.');
                 break;
 
             // User wants to change some options, sure!
@@ -81,8 +84,9 @@ class AntiSpam extends extension {
                 // Make sure we have a more generic version of the chat namespace.
                 $safe_chan = strtolower(substr($channel, 1));
 
+
                 if (!array_key_exists($safe_chan, $this->data)) {
-                    $this->dAmn->say($ns, $from .': Anti-Spam is not enabled for that channel!');
+                    $this->dAmn->say($ns, $from .': Anti-Spam is not enabled for '.$channel.'.');
                     return;
                 }
 
