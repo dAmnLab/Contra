@@ -40,14 +40,17 @@ goto stop
 :loop
 if exist "storage\bat\quit.bcd" (
 	del storage\bat\quit.bcd
+	del storage\lock
 	goto stop
 )
 if exist "storage\bat\restart.bcd" (
 	del storage\bat\restart.bcd
+	del storage\lock
 	goto refresher
 )
 if exist "storage\bat\update.bcd" (
 	del storage\bat\update.bcd
+	del storage\lock
 	goto update
 )
 if !%1==! goto stopped

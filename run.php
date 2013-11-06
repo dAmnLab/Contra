@@ -21,7 +21,6 @@
 	if (file_exists('./storage/bat/restart.bcd')) {
 		unlink('./storage/bat/restart.bcd' );
 	}
-
 	// Move oauth.json from main folder to storage folder.
 	if (file_exists('oauth.json')) {
 		rename('oauth.json', './storage/oauth.json');

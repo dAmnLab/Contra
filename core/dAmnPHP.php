@@ -69,6 +69,11 @@
 		sleep(1);
 		exit();
 	}
+	// Do a PHP version check. PHP under 5.4.x is no longer supported, but will display warning.
+	if (version_compare(phpversion(), '5.4.0', '<')) {
+		echo '>> WARNING: PHP versions under 5.4.x is no longer supported. You are recommended to upgrade your PHP to the latest version. See install guide for latest PHP version.',chr(10);
+		sleep(1);
+	}
 	// This is just a constant...
 	define('LBR', chr(10)); // LineBReak
 
@@ -210,7 +215,7 @@ class dAmnPHP {
 					}
 
 					// Grab the JSON data from the server.
-					$tokens = $this->socket('/oauth2/draft15/token?client_id='.$this->client_id.'&redirect_uri=http://damn.shadowkitsune.net/apicode/&grant_type=refresh_token&client_secret='.$this->client_secret.'&refresh_token='.$this->oauth_tokens->refresh_token);
+					$tokens = $this->socket('/oauth2/token?client_id='.$this->client_id.'&redirect_uri=http://damn.shadowkitsune.net/apicode/&grant_type=refresh_token&client_secret='.$this->client_secret.'&refresh_token='.$this->oauth_tokens->refresh_token);
 
 					// Decode it and store it.
 					$this->oauth_tokens = json_decode($tokens);
@@ -242,7 +247,7 @@ class dAmnPHP {
 					}
 
 					// Place a placebo call to check if the token has expired.
-					$placebo = json_decode($this->socket('/api/draft15/placebo?access_token='.$this->oauth_tokens->access_token));
+					$placebo = json_decode($this->socket('/api/oauth2/placebo?access_token='.$this->oauth_tokens->access_token));
 
 					// Is the token OK?
 					if ($placebo->status != 'success') {
@@ -282,7 +287,7 @@ class dAmnPHP {
 			$code = trim(fgets(STDIN)); // STDIN for reading input
 
 			// Getting the access token.
-			$tokens = $this->socket('/oauth2/draft15/token?client_id='.$this->client_id.'&redirect_uri=http://damn.shadowkitsune.net/apicode/&grant_type=authorization_code&client_secret='.$this->client_secret.'&code='.$code);
+			$tokens = $this->socket('/oauth2/token?client_id='.$this->client_id.'&redirect_uri=http://damn.shadowkitsune.net/apicode/&grant_type=authorization_code&client_secret='.$this->client_secret.'&code='.$code);
 
 			// Store the token(s)
 			$this->oauth_tokens = json_decode($tokens);
@@ -317,7 +322,7 @@ class dAmnPHP {
 		}
 
 		// Grab the damntoken and set it to damntoken variable
-		$this->damntoken = json_decode($this->socket('/api/draft15/user/damntoken?access_token='.$this->oauth_tokens->access_token));
+		$this->damntoken = json_decode($this->socket('/api/oauth2/user/damntoken?access_token='.$this->oauth_tokens->access_token));
 	}
 
 	// Function to reuse the curl code.

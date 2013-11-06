@@ -19,7 +19,7 @@ class Bot {
 	public $start;
 	public $info = array(
 		'name' => 'Contra',
-		'version' => '5.7.1',
+		'version' => '5.7.2',
 		'status' => '',
 		'release' => 'stable',
 		'author' => 'photofroggy',
@@ -259,6 +259,7 @@ class Bot {
 	}
 
 	function run() {
+		file_put_contents('./storage/lock', getmypid(), LOCK_EX);
 		while ($this->running === true) {
 			$this->Events->trigger('loop');
 			$this->Timer->triggerEvents();

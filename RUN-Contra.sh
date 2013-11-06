@@ -42,6 +42,7 @@ else
 			echo "** One moment please..."
 			echo "==============================================================================="
 			rm -f "./storage/bat/restart.bcd"
+			rm -f "./storage/lock"
 			rr=2
 		elif [ -e "./storage/bat/update.bcd" ]; then
 			echo "==============================================================================="
@@ -49,10 +50,12 @@ else
 			echo "** One moment please..."
 			echo "==============================================================================="
 			rm -f "./storage/bat/update.bcd"
+			rm -f "./storage/lock"
 			rr=1
 			ss=1
 		elif [ -e "./storage/bat/quit.bcd" ]; then
 			rm -f "./storage/bat/quit.bcd"
+			rm -f "./storage/lock"
 		else
 			if [[ -z $1 || $1 = "--debug" || $1 = "--bot" ]]; then
 				echo "==============================================================================="
