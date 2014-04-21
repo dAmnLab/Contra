@@ -284,7 +284,7 @@ class dAmnPHP {
 
 			// Retreiving the code
 			echo 'Enter the code given by the above link:' . LBR;
-			$code = trim(fgets(STDIN)); // STDIN for reading input
+			$code = trim(str_replace(' ', '', fgets(STDIN))); // STDIN for reading input
 
 			// Getting the access token.
 			$tokens = $this->socket('/oauth2/token?client_id='.$this->client_id.'&redirect_uri=http://damn.shadowkitsune.net/apicode/&grant_type=authorization_code&client_secret='.$this->client_secret.'&code='.$code);
@@ -344,7 +344,11 @@ class dAmnPHP {
 	}
 
 	private function error($text) {
-		echo " \033[1;33m" . $text . "\033[0m";
+		if (PHP_OS == 'Linux' || PHP_OS == 'Darwin') {
+			echo " \033[1;33m" . $text . "\033[0m";
+		} else {
+			echo $text;
+		}
 	}
 
 	function send_headers($socket, $host, $url, $referer, $post=null, $cookies=array())

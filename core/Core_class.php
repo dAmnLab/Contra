@@ -19,7 +19,7 @@ class Bot {
 	public $start;
 	public $info = array(
 		'name' => 'Contra',
-		'version' => '5.7.2',
+		'version' => '5.7.3',
 		'status' => '',
 		'release' => 'stable',
 		'author' => 'photofroggy',
@@ -196,8 +196,8 @@ class Bot {
 		} else {
 			$this->damntoken = empty($config['damntoken']) ? '' : unserialize($config['damntoken']);
 		}
-		$this->updatenotes = empty($config['updatenotes']) ? true : $config['updatenotes'];
-		$this->autoupdate = empty($config['autoupdate']) ? false : $config['autoupdate'];
+		$this->updatenotes = empty($config['updatenotes']) ? true : unserialize($config['updatenotes']);
+		$this->autoupdate = empty($config['autoupdate']) ? false : unserialize($config['autoupdate']);
 		$this->timezone = $config['timezone'];
 	}
 
