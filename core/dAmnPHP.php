@@ -215,7 +215,7 @@ class dAmnPHP {
 					}
 
 					// Grab the JSON data from the server.
-					$tokens = $this->socket('/oauth2/token?client_id='.$this->client_id.'&redirect_uri=http://damn.shadowkitsune.net/apicode/&grant_type=refresh_token&client_secret='.$this->client_secret.'&refresh_token='.$this->oauth_tokens->refresh_token);
+					$tokens = $this->socket('/oauth2/token?client_id='.$this->client_id.'&redirect_uri=https://damn.shadowkitsune.net/apicode/&grant_type=refresh_token&client_secret='.$this->client_secret.'&refresh_token='.$this->oauth_tokens->refresh_token);
 
 					// Decode it and store it.
 					$this->oauth_tokens = json_decode($tokens);
@@ -227,7 +227,9 @@ class dAmnPHP {
 							echo $this->error('Something went wrong while trying to grab a token! Error: ' . $this->oauth_tokens->error_description) . LBR;
 							echo 'Let\'s try and grab a new token...' . LBR;
 						}
-						unlink($oauth_file);
+						if (file_exists($oauth_file)) {
+							unlink($oauth_file);
+						}
 						$this->oauth(0, true);
 					} else {
 						// It was OK, let's store it.
@@ -247,7 +249,7 @@ class dAmnPHP {
 					}
 
 					// Place a placebo call to check if the token has expired.
-					$placebo = json_decode($this->socket('/api/oauth2/placebo?access_token='.$this->oauth_tokens->access_token));
+					$placebo = json_decode($this->socket('/api/v1/oauth2/placebo?access_token='.$this->oauth_tokens->access_token));
 
 					// Is the token OK?
 					if ($placebo->status != 'success') {
@@ -269,7 +271,9 @@ class dAmnPHP {
 				if ($mode == 0) {
 					echo $this->error('Your token file is empty, grabbing new tokens...') . LBR;
 				}
-				unlink($oauth_file);
+				if (file_exists($oauth_file)) {
+					unlink($oauth_file);
+				}
 				$this->oauth(0);
 			}
 		} else {
@@ -280,14 +284,14 @@ class dAmnPHP {
 
 			// Request that the user authorize the request.
 			echo 'We need to authorize a new token. Log into your bot\'s account and then open this link in your web browser:' . LBR;
-			echo 'https://bit.ly/WI6u6y' . LBR;
+			echo 'https://bit.ly/1pYz6ZF' . LBR;
 
 			// Retreiving the code
 			echo 'Enter the code given by the above link:' . LBR;
 			$code = trim(str_replace(' ', '', fgets(STDIN))); // STDIN for reading input
 
 			// Getting the access token.
-			$tokens = $this->socket('/oauth2/token?client_id='.$this->client_id.'&redirect_uri=http://damn.shadowkitsune.net/apicode/&grant_type=authorization_code&client_secret='.$this->client_secret.'&code='.$code);
+			$tokens = $this->socket('/oauth2/token?client_id='.$this->client_id.'&redirect_uri=https://damn.shadowkitsune.net/apicode/&grant_type=authorization_code&client_secret='.$this->client_secret.'&code='.$code);
 
 			// Store the token(s)
 			$this->oauth_tokens = json_decode($tokens);
@@ -298,7 +302,9 @@ class dAmnPHP {
 					echo $this->error('Something went wrong while trying to grab a token! Error: ' . $this->oauth_tokens->error_description) . LBR;
 					echo 'Did you log into your bot\'s account and go to the link above?' . LBR;
 				}
-				unlink($oauth_file);
+				if (file_exists($oauth_file)) {
+					unlink($oauth_file);
+				}
 				$this->oauth(0);
 			} else {
 				// Woo, got a token!
@@ -322,7 +328,7 @@ class dAmnPHP {
 		}
 
 		// Grab the damntoken and set it to damntoken variable
-		$this->damntoken = json_decode($this->socket('/api/oauth2/user/damntoken?access_token='.$this->oauth_tokens->access_token));
+		$this->damntoken = json_decode($this->socket('/api/v1/oauth2/user/damntoken?access_token='.$this->oauth_tokens->access_token));
 	}
 
 	// Function to reuse the curl code.
