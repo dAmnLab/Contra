@@ -69,10 +69,17 @@
 		sleep(1);
 		exit();
 	}
-	// Do a PHP version check. PHP under 5.4.x is no longer supported, but will display warning.
+	// Do a PHP version check. PHP under 5.4.x is no longer supported, kill the program if php is under 5.4.x.
 	if (version_compare(phpversion(), '5.4.0', '<')) {
-		echo '>> WARNING: PHP versions under 5.4.x is no longer supported. You are recommended to upgrade your PHP to the latest version. See install guide for latest PHP version.',chr(10);
+		echo '>> WARNING: PHP versions under 5.4.x is no longer supported. You MUST to upgrade your PHP to continue.',chr(10);
+		if (PHP_OS == 'WIN32' || PHP_OS == 'WINNT' || PHP_OS == 'Windows') {
+			echo '>> See install guide for latest PHP version. http://botdom.com/documentation/Install_PHP_on_Windows',chr(10),'>> ';
+		}
+		if (PHP_OS == 'Linux') {
+			echo '>> If you\'re using distro\'s php and it\'s under 5.4.x, you must compile php from source yourself.',chr(10),'>> ';
+		}
 		sleep(1);
+		exit();
 	}
 	// This is just a constant...
 	define('LBR', chr(10)); // LineBReak
@@ -284,7 +291,7 @@ class dAmnPHP {
 
 			// Request that the user authorize the request.
 			echo 'We need to authorize a new token. Log into your bot\'s account and then open this link in your web browser:' . LBR;
-			echo 'https://bit.ly/1pYz6ZF' . LBR;
+			echo 'https://bit.ly/1taqn2C' . LBR;
 
 			// Retreiving the code
 			echo 'Enter the code given by the above link:' . LBR;
@@ -298,10 +305,8 @@ class dAmnPHP {
 
 			// Was it a success?
 			if ($this->oauth_tokens->status != 'success') {
-				if ($mode == 0) {
-					echo $this->error('Something went wrong while trying to grab a token! Error: ' . $this->oauth_tokens->error_description) . LBR;
-					echo 'Did you log into your bot\'s account and go to the link above?' . LBR;
-				}
+				echo $this->error('Something went wrong while trying to grab a token! Error: ' . $this->oauth_tokens->error_description) . LBR;
+				echo 'Did you log into your bot\'s account and go to the link above?' . LBR;
 				if (file_exists($oauth_file)) {
 					unlink($oauth_file);
 				}
@@ -485,10 +490,7 @@ class dAmnPHP {
 		$this->send('part '.$channel.LBR);
 	}
 	function say($ns, $message, $DATASHARE = FALSE) {
-		if (strtolower($ns) == 'chat:irpg') {
-			return;
-		}
-		if (strtolower($ns) == 'chat:dAmnIdlers') {
+		if (strtolower($ns) == 'chat:irpg' || strtolower($ns) == 'chat:dAmnIdlers') {
 			return;
 		}
 		if (is_array($ns)) {
@@ -509,10 +511,7 @@ class dAmnPHP {
 		}
 	}
 	function action($ns, $message, $DATASHARE = FALSE) {
-		if (strtolower($ns) == 'chat:irpg') {
-			return;
-		}
-		if (strtolower($ns) == 'chat:dAmnIdlers') {
+		if (strtolower($ns) == 'chat:irpg' || strtolower($ns) == 'chat:dAmnIdlers') {
 			return;
 		}
 		if (strtolower($ns) != 'chat:datashare' && strtolower($ns) != 'chat:dsgateway') {
@@ -522,10 +521,7 @@ class dAmnPHP {
 		}
 	}
 	function npmsg($ns, $message, $DATASHARE = FALSE) {
-		if (strtolower($ns) == 'chat:irpg') {
-			return;
-		}
-		if (strtolower($ns) == 'chat:dAmnIdlers') {
+		if (strtolower($ns) == 'chat:irpg' || strtolower($ns) == 'chat:dAmnIdlers') {
 			return;
 		}
 		if (strtolower($ns) != 'chat:datashare' && strtolower($ns) != 'chat:dsgateway') {
